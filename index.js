@@ -11,7 +11,6 @@ let input = getNode("#add-todo-input");
 let todoListUl = getNode("#todo-list-ul");
 
 const dateObj = new Date();
-let todoListArray = [];
 
 //input submit
 // form submit 처리 방지
@@ -19,10 +18,10 @@ inputForm.addEventListener("submit", handleTodoList);
 
 //delete btn click
 //document에 optionalBtn이 renderItem함수 실행 이후 생성되므로, 처음부터 작성되어있던 ul에 이벤트를 위임하고 if문을 통해 삭제버튼에만 이벤트가 발생하도록 작성
-todoListUl.addEventListener("click", function(e){
-    if(e.target.closest(".todo-list-optional")){
-        handleRemove(e)
-    }
+todoListUl.addEventListener("click", function (e) {
+  if (e.target.closest(".todo-list-optional")) {
+    handleRemove(e);
+  }
 });
 /*
 getNode()로 불러온 버튼이 아닌 class명으로 작성하는 이유
@@ -42,7 +41,7 @@ function handleTodoList(e) {
     date: dateObj,
     complete: false,
   };
-  //배열 저장
+  //배열 저장 및 localstorage에 추가
   addItemArray(newTodoObj);
 
   //li 생성 및 목록 추가
@@ -51,16 +50,12 @@ function handleTodoList(e) {
     value: newTodoObj.contents,
     id: newTodoObj.id,
   });
-
-  //localStorage 저장처리
-  setStorage(todoListArray);
 }
 
 // 완료 탭으로 이동
 function moveToCompleteTab(e) {
-
-    //filter
-    // const completeArray = todoListArray.filter((obj)=>obj.complete===true)
+  //filter
+  // const completeArray = todoListArray.filter((obj)=>obj.complete===true)
 }
 
 // 미완료 탭으로 이동
@@ -95,7 +90,9 @@ function createItem(value, id) {
               <div class="todo-list-text">${value}</div>
             </div>
             <div class="align-wrap">
-            <div class="todo-list-date">${dateObj.getMonth()+1}월 ${dateObj.getDate()}일</div>
+            <div class="todo-list-date">${
+              dateObj.getMonth() + 1
+            }월 ${dateObj.getDate()}일</div>
             <button type="button" class="todo-list-optional">
               <svg
                 width="20"
@@ -123,26 +120,30 @@ function renderItem({ target, value, id }) {
 
 //8. 해당 data-id를 가진 <li> 요소를 찾아 DOM에서 제거
 function removeItem(id) {
-    /*아래의 코드는 리스트의 첫번째 li만 비교하고있기 때문에 오류 발생??
+  /*아래의 코드는 리스트의 첫번째 li만 비교하고있기 때문에 오류 발생??
     if(todoListUl.querySelector('li').id===id){
         todoListUl.querySelector('li').remove()
     }
     */
-   const li=todoListUl.querySelector('li')
-   //배열이면 forEach 쓰면 좋을꺼같은데..
-   console.log();
-   
-   
+  const li = todoListUl.querySelector("li");
+  //배열이면 forEach 쓰면 좋을꺼같은데..
+  console.log();
 }
 
-// 2. 새로운 할 일을 todoListArray에 객체 형태로 추가
+// 2. 새로운 할 일을 todoListArray에 객체 형태로 추가 + localStorage 저장
 function addItemArray(todoListObj) {
+  let todoListArray = getStorage();
+
   todoListArray.push(todoListObj);
   input.value = "";
+
+  //localStorage 저장처리
+  setStorage(todoListArray);
 }
 
 //7. 배열에서 해당 id와 일치하는 항목을 제거 (filter 사용)
 function removeItemArray(id) {
+  let todoListArray = getStorage();
   todoListArray = todoListArray.filter((todoList) => todoList.id !== id);
   setStorage(todoListArray);
 }
@@ -151,17 +152,17 @@ function removeItemArray(id) {
 // 해당 항목을 제거하고, 배열에서도 삭제하며, localStorage 업데이트
 function handleRemove(event) {
   //해당 항목 제거
-  removeItem(event.target.closest("li").id)
+  removeItem(event.target.closest("li").id);
 
   //배열에서 삭제하면서 localStorage에 업데이트
   // li를 찾기위해선 parentNode 중첩이 필요(event.target.parentNode.parentNode.parentNode.id) closest(selector)를 사용하면 가장 가까운 상위 요소 중 해당 선택자에 맞는 걸 찾아준다
-  removeItemArray(event.target.closest("li").id)
+  removeItemArray(event.target.closest("li").id);
 }
 
 //5. 페이지가 로드되었을 때 실행
 // localStorage에서 기존 todo 데이터를 불러와 목록 복원
 function init() {
-  todoListArray = getStorage();
+  let todoListArray = getStorage();
   if (todoListArray !== null) {
     todoListArray.forEach((element) => {
       renderItem({
@@ -173,4 +174,3 @@ function init() {
   }
 }
 window.addEventListener("load", () => init());
-
